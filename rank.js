@@ -19,7 +19,7 @@
     { name: "Champion", floor: 1700, color: "#E5252A" }
   ];
   var TOTAL_PLACEMENTS = 5;
-  var R = { card: null, history: [], board: [], boardAt: 0, loadedFor: null, loading: false, judging: {}, results: {}, tries: {}, announced: {}, shownFor: null };
+  var R = { pause: null, pauseTimer: null, wasPaused: false, card: null, history: [], board: [], boardAt: 0, loadedFor: null, loading: false, judging: {}, results: {}, tries: {}, announced: {}, shownFor: null };
 
   function $(id) { return document.getElementById(id); }
   function esc(s) { return escapeHtml(String(s == null ? "" : s)); }
@@ -126,7 +126,7 @@
         "</div>" +
       "</div>" +
       progressBar(c) +
-      '<details class="rank-how"><summary>' + esc(t("rank.how.title")) + "</summary><p>" + esc(t("rank.how.body")) + "</p></details>" +
+      '<details class="rank-how"><summary>' + esc(t("rank.how.title")) + "</summary><p>" + esc(t("rank.how.body")) + "</p><p>" + esc(t("rank.how.rules")) + "</p></details>" +
       '<h4 class="rank-h">' + esc(t("rank.recent")) + "</h4>" +
       (recent ? '<ul class="rank-list">' + recent + "</ul>" : '<p class="rank-sub">' + esc(t("rank.none")) + "</p>") +
       '<h4 class="rank-h">' + esc(t("rank.board")) + "</h4>" +
@@ -184,13 +184,21 @@
       notes.push(tf(tierIndex(mine.tierAfter) > tierIndex(mine.tierBefore) ? "rank.result.promoted" : "rank.result.demoted", { tier: mine.tierAfter }));
     }
     var shownTier = mine.tierAfter || null;
+    var rubric = "";
+    if (res.rubric && res.rubric.a && res.rubric.b) {
+      var other = me === "a" ? "b" : "a";
+      var rows = ["argument", "evidence", "rebuttal", "clarity"].map(function (k) {
+        return "<tr><th scope=\"row\">" + esc(t("rank.rubric." + k)) + "</th><td>" + pipsHtml(res.rubric[me][k]) + "</td><td>" + pipsHtml(res.rubric[other][k]) + "</td></tr>";
+      }).join("");
+      rubric = '<table class="rank-rubric"><caption>' + esc(t("rank.rubric.title")) + "</caption><thead><tr><td></td><th scope=\"col\">" + esc(mine.name || "") + "</th><th scope=\"col\">" + esc((res[other] || {}).name || "") + "</th></tr></thead><tbody>" + rows + "</tbody></table>";
+    }
     return '<div class="rank-result ' + outcome + '">' +
       '<div class="rank-result-head">' + badge(shownTier, 44) + "<div><b>" + esc(word) + "</b>" +
       (shownTier ? "<span>" + esc(shownTier) + "</span>" : "<span>" + esc(t("rank.unranked")) + "</span>") + "</div></div>" +
       '<div class="rank-result-delta"><span>' + esc(mine.before) + "</span> → <span>" + esc(mine.after) + "</span> <em>" + esc(signed(mine.delta)) + "</em></div>" +
       notes.map(function (n) { return '<p class="rank-result-note">' + esc(n) + "</p>"; }).join("") +
       (res.reason ? '<p class="rank-result-why"><b>' + esc(t("rank.judge.reason")) + "</b> " + esc(res.reason) + "</p>" : "") +
-      "</div>";
+      rubric + "</div>";
   }
 
   function paintResult(room, res) {
@@ -239,9 +247,79 @@
       });
   }
 
+  /* ---------------------------------------------------------------- ranked rules shown during the debate */
+  function renderAgree(room) {
+    var el = $("online-agree");
+    if (!el) return;
+    var p = room.ranked ? room.proposal : null;
+    if (!p) { el.hidden = true; el.innerHTML = ""; el.dataset.sig = ""; return; }
+    var sig = [p.kind, p.by, p.side, p.type, room.yourSide].join("|");
+    if (el.dataset.sig === sig && !el.hidden) return;
+    el.dataset.sig = sig;
+    var me = room.yourSide;
+    var mine = p.by === me;
+    var byName = p.by === "a" ? room.hostName : (room.guestName || "");
+    var oppName = me === "a" ? (room.guestName || "") : room.hostName;
+    var text;
+    if (p.kind === "end") text = mine ? tf("rank.agree.wait.end", { name: oppName }) : tf("rank.agree.end.ask", { name: byName });
+    else {
+      var target = p.side === "a" ? room.hostName : (room.guestName || "");
+      text = mine ? tf("rank.agree.wait.score", { name: oppName }) : tf("rank.agree.score.ask", { name: byName, target: target, kind: t("rank.agree.kind." + p.type) });
+    }
+    el.innerHTML = "<span>" + esc(text) + "</span>" + (mine
+      ? '<button type="button" class="btn btn-sm" data-agree="no">' + esc(t("rank.agree.cancel")) + "</button>"
+      : '<button type="button" class="btn btn-sm btn-primary" data-agree="yes">' + esc(t("rank.agree.yes")) + '</button><button type="button" class="btn btn-sm" data-agree="no">' + esc(t("rank.agree.no")) + "</button>");
+    el.hidden = false;
+    el.querySelectorAll("[data-agree]").forEach(function (b) {
+      b.addEventListener("click", function () { respondOnline(b.getAttribute("data-agree") === "yes"); });
+    });
+  }
+
+  function paintPause() {
+    var pz = R.pause;
+    var note = $("online-pause-note"), btn = $("online-btn-pause");
+    if (!pz || !note) return;
+    var left = pz.paused ? Math.max(0, pz.left - (Date.now() - pz.at) / 1000) : pz.left;
+    note.hidden = false;
+    note.textContent = pz.paused ? tf("rank.pause.note", { n: Math.ceil(left) }) : t("rank.pause.rule");
+    if (btn) {
+      btn.textContent = left > 0 ? tf("rank.pause.left", { n: Math.ceil(left) }) : t("rank.pause.none");
+      if (left <= 0) btn.disabled = true;
+    }
+  }
+
+  function renderPause(room) {
+    var note = $("online-pause-note");
+    if (!room.ranked || !room.pause) {
+      if (note) note.hidden = true;
+      R.pause = null; R.pauseSrc = null;
+      if (R.pauseTimer) { clearInterval(R.pauseTimer); R.pauseTimer = null; }
+      return;
+    }
+    var pz = room.pause;
+    // Each poll brings a fresh pause object; re-renders in between must not restart the local countdown.
+    if (R.pauseSrc !== pz) { R.pauseSrc = pz; R.pause = { left: pz.left, paused: pz.paused, at: Date.now() }; }
+    paintPause();
+    if (pz.paused && !R.pauseTimer) R.pauseTimer = setInterval(paintPause, 1000);
+    if (!pz.paused && R.pauseTimer) { clearInterval(R.pauseTimer); R.pauseTimer = null; }
+    // The server restarts the clock by itself when the pause runs out; the speaker's microphone has to follow.
+    var mine = !!room.yourSide && room.currentSide === room.yourSide;
+    if (R.wasPaused && room.timerRunning && mine && !state.onlineRecog && typeof startOnlineMic === "function") startOnlineMic();
+    R.wasPaused = !!pz.paused;
+  }
+
+  function renderActive(room) {
+    var note = $("online-score-note");
+    if (note) note.hidden = !room.ranked;
+    renderAgree(room);
+    renderPause(room);
+  }
+
   function onRoom(room) {
     if (!room) return;
     setFlags(room);
+    if (room.status === "active") renderActive(room);
+    else { renderAgree({ ranked: false }); renderPause({ ranked: false }); var sn = $("online-score-note"); if (sn) sn.hidden = true; }
     if (room.status === "active" && room.ranked && !R.announced[room.roomCode]) {
       R.announced[room.roomCode] = true;
       if (room.yourSide === "b") toast(t("rank.notice.joined"), "warn");

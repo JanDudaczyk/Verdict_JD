@@ -1175,6 +1175,18 @@
   .rank-result-note { font-weight: 800; }
   .rank-result-why { font-size: 14px; color: var(--ink-2); }
 
+
+  .agree-bar { margin: 0 0 16px; padding: 12px 14px; border: 2px solid var(--ink); border-left-width: 10px; border-left-color: #FFE14D; background: #fff; display: flex; flex-wrap: wrap; align-items: center; gap: 10px; font-weight: 700; }
+  .agree-bar[hidden] { display: none; }
+  .agree-bar span { flex: 1 1 240px; }
+  .rank-score-note { margin: -6px 0 14px; font-size: 13px; color: var(--ink-2); }
+  .rank-score-note[hidden] { display: none; }
+  .rank-rubric { width: 100%; max-width: 420px; margin-top: 10px; border-collapse: collapse; font-size: 14px; }
+  .rank-rubric caption { text-align: left; font-weight: 800; padding-bottom: 4px; }
+  .rank-rubric th { text-align: left; font-weight: 700; padding: 3px 8px 3px 0; }
+  .rank-rubric td { padding: 3px 0; }
+  .rank-rubric .tr-pips { white-space: nowrap; }
+
   /* ---------- League and coach tools ---------- */
   .coach-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 18px; margin-bottom: 18px; }
   .league-note { margin: 0 0 10px; font-size: 14.5px; }
@@ -2379,8 +2391,12 @@
                   <button class="btn btn-primary" onclick="continueOnlineCrossfire()" data-i18n="online.continue">Continue</button>
                 </div>
                 <div id="online-waiting-turn" data-i18n="online.waitingturn" style="display:none; color:var(--text-dim); font-size:13px; text-align:center;">Waiting for your opponent to finish their turn…</div>
+                <p class="voice-tip" id="online-pause-note" hidden></p>
               </div>
             </div>
+
+            <div class="agree-bar" id="online-agree" hidden role="status" aria-live="polite"></div>
+            <p class="rank-score-note" id="online-score-note" hidden data-i18n="rank.score.note">In a ranked match, scores come from the AI only. These buttons ask your opponent to agree.</p>
 
             <div class="results-scores" style="margin-bottom:16px;">
               <div class="result-card" id="online-card-a">
@@ -2412,6 +2428,8 @@
               <div class="subtitles empty" id="online-live-subtitles" data-i18n="online.nothingyet">Nothing yet.</div>
             </div>
 
+            <div id="online-turn-review"></div>
+
             <div class="transcript-log">
               <h3 data-i18n="online.transcriptsofar">Transcript so far</h3>
               <div id="online-transcript-list"></div>
@@ -2441,6 +2459,9 @@
               <button class="btn btn-primary" onclick="runOnlineJudge()" data-i18n="online.runjudge">Run AI judge</button>
               <div id="online-judge-verdicts" style="margin-top:14px;"></div>
             </div>
+
+            <div id="online-final-claims" class="claim-report"></div>
+            <div id="online-final-reviews"></div>
 
             <div class="transcript-log">
               <h3 data-i18n="online.fulltranscript">Full transcript</h3>
@@ -2882,7 +2903,7 @@
       <p><b>Labels.</b> The Service sorts what is said into labels such as true, mostly true, misleading, false, inconclusive, opinion, value claim, prediction, hypothetical, case claim (Mock Trial), unverifiable, and to verify. These are an AI's best guess, not a finding. "Opinion," "unverifiable," and "inconclusive" mean the tool did not or could not decide — they are not a judgment that anything is right or wrong. The AI's knowledge ends before today's date, so it can mislabel recent events; for claims that look recent it may consult Wikipedia, which can itself be wrong, incomplete, or out of date.</p>
       <p><b>Automatic scoring.</b> While a turn is live, a confident true, mostly true, misleading, or false label can add or remove points for the speaker automatically (partial points for "mostly true" and "misleading"). Claims marked "to verify" are held back and checked when that person finishes speaking, so points can change — and the winner can change — right after a turn has ended. In Online Debate, fallacy flags that meet the confidence threshold are also scored automatically; in a local round they are suggestions that a person accepts or ignores. Opinions, predictions, hypotheticals, case claims, and unverifiable statements are never scored. Automatic scores are tagged and can be reversed ("Wrong call?" or the undo tray). A limit on automatic checks applies to each round.</p>
       <p><b>Availability.</b> The Service depends on outside AI services that limit how much they can be used. When they are busy, checks may slow down, be retried, switch to a backup AI (whose accuracy may differ), be skipped, or pause, and listening may switch to a different method. We do not guarantee that any check will run, or run on time.</p>
-      <p><b>Ranked matches and ratings.</b> Online Debate can be played Casual or Ranked. In a ranked match, an AI judge reads the transcript of what each side said and picks a winner or a draw, and both players' ratings change using an Elo formula. The judge is an AI: it can be wrong or biased, and it only sees the words your browser's speech recognition produced. Ranks (Bronze, Iron, Silver, Gold, Platinum, Diamond, Champion) and the leaderboard are for fun and practice. They are not an official ranking, carry no prize, and are not evidence of anyone's ability. A match does not count if either side says fewer than 40 words, if the same two accounts have already played three rated matches in 24 hours, or if the judge is unavailable. We may void matches, correct or reset ratings, hide someone from the leaderboard, or change how ratings work at any time, in particular if we believe someone is cheating (for example by arranging matches to inflate a rating, typing or pasting text instead of speaking, or writing instructions aimed at the judge). Ratings can be deleted on request.</p>
+      <p><b>Ranked matches and ratings.</b> Online Debate can be played Casual or Ranked. In a ranked match, an AI judge reads the transcript of what each side said and picks a winner or a draw, and both players' ratings change using an Elo formula. The judge is an AI: it can be wrong or biased, and it only sees the words your browser's speech recognition produced. Ranks (Bronze, Iron, Silver, Gold, Platinum, Diamond, Champion) and the leaderboard are for fun and practice. They are not an official ranking, carry no prize, and are not evidence of anyone's ability. A match does not count if either side says fewer than 40 words, if the same two accounts have already played three rated matches in 24 hours, or if the judge is unavailable. We may void matches, correct or reset ratings, hide someone from the leaderboard, or change how ratings work at any time, in particular if we believe someone is cheating (for example by arranging matches to inflate a rating, typing or pasting text instead of speaking, or writing instructions aimed at the judge). In a ranked match scores come from the AI's automatic checks only (manual scoring is switched off), ending the debate early requires both players to agree, a score change requires both players to agree, and each turn allows at most 30 seconds of pause, after which the clock restarts by itself. If you and your opponent agree to a score change it is recorded in the round but never changes the rating, which comes from the judge alone. Ratings can be deleted on request.</p>
 
       <h4>4. Microphone access &amp; data collection consent</h4>
       <p>Live-transcription features request access to your device's microphone. By granting that permission and using those features, you consent to your speech being processed for the sole purpose of generating a transcript and running the fact-check, fallacy-detection, and judging features you've enabled. That processing is done by your browser's built-in speech recognition (which in many browsers, including Chrome and Edge, is run by the browser's maker and may send audio to its servers under its own policy) or — in High-accuracy mode, in Upload mode, and automatically if your browser's speech recognition is unavailable or stops working — by short audio clips sent through our server to Groq for transcription. The resulting text is then sent to Groq (and, where described in the Privacy Policy, looked up on Wikipedia) to produce fact-checks, labels, and judging. Details are in the Privacy Policy. You are responsible for what you say while the microphone is active and for obtaining any consent required from other people present or recorded. Don't use the Service to capture or process anyone's speech without their knowledge where that's required by law.</p>
@@ -2992,11 +3013,11 @@
       <p><b>High-accuracy transcription, and Upload mode.</b> The app records short clips from the microphone (about 3½ seconds each; longer if the service is busy; clips with no sound are skipped), or, in Upload mode, extracts the audio from the file you choose inside your browser and cuts it into chunks of up to about 2 minutes. Each clip or chunk is sent to our server, which forwards it to Groq's speech-to-text service and returns the text. Our server does not save the audio. Your browser may apply echo cancellation, noise suppression, and automatic gain to the microphone before capture; that happens on your device.</p>
       <p><b>Live fact-checks, labels, and fallacy flags.</b> The transcribed text is sent, through our server, to Groq: up to the 4 most recent sentences from the current speaker, up to 2 earlier sentences from the same speaker as context, and the debate topic. It does not include audio and does not include debater names. Groq returns a kind and verdict for each statement and any fallacies. If the main AI is busy, our server tries a backup AI from the same provider, and if that is busy too, the check is retried a little later.</p>
       <p><b>Wikipedia lookups.</b> For claims that look recent (for example they mention 2024 or later, or "recently" or "last year"), and for claims held back until the end of a speech, your browser sends the claim text directly to Wikipedia's search (run by the Wikimedia Foundation), which can see your IP address and that text. The first Wikipedia excerpts that come back are added to the request sent to Groq.</p>
-      <p><b>Turn reviews.</b> When a turn ends (and the "Review every turn" option is on), the text of that turn, the opponent's previous turn if there was one, and the debate topic are sent through our server to Groq to produce coaching feedback. It does not include audio or debater names (the speaker is identified only by side, such as "Pro Team"). Reviews are kept in your browser's memory during the session, are shown on the results page, and are not saved anywhere when you leave. They never change the score. Turn reviews aren't run in Online Debate.</p>
+      <p><b>Turn reviews.</b> When a turn ends (and the "Review every turn" option is on), the text of that turn, the opponent's previous turn if there was one, and the debate topic are sent through our server to Groq to produce coaching feedback. It does not include audio or debater names (the speaker is identified only by side, such as "Pro Team"). Reviews are kept in your browser's memory during the session, are shown on the results page, and are not saved anywhere when you leave. They never change the score. In Online Debate your own device does the same after each of your turns: it sends the text of your turn, your opponent's previous turn, and the topic for a review, and sends your held-back claims for verification. Your opponent's device does this for theirs, and neither of you can see the other's reviews.</p>
       <p><b>Personal lessons.</b> If you press "Make my lesson" on the Progress screen, the names and counts of your most frequent flagged fallacies (for example "Ad Hominem, 4 times") are sent through our server to Groq. Nothing else is sent: no speech, topics, or debater names. The lesson it writes is saved in your browser's local storage so it is still there next time, and you can replace it.</p>
       <p><b>Which AI model.</b> Live fact-checks use one Groq model; turn reviews, the AI judge, argument analysis, Case Checker, Case Builder, and personal lessons use a second Groq model, so coaching can't use up the live-check allowance. If one is at its limit, the other is used as a backup.</p>
       <p><b>Online voice and live text.</b> In Online Debate the two debaters hear each other over a direct, browser-to-browser audio link (WebRTC). The voice does not pass through our servers and we do not record it. To set the link up, our server relays two short connection messages between the debaters (they contain network addresses and are deleted when the debate ends, and otherwise after about 15 minutes, with the cleanup running whenever a new connection message arrives), and Google's public STUN servers help the two browsers find a route, which means Google and the other debater can see your IP address. Your microphone is switched off by the app except on your own turn (and during crossfire), and you can also mute yourself. The other debater's device is able to record what it receives, so only debate people you trust. While someone is speaking, their live transcript text goes straight to the opponent over the same link; if that link isn't available, the text goes through our server as a backup, replacing the previous text every second or so and deleted when the turn ends. Some strict school or office networks block the direct link; the app then says voice isn't available and the live transcript still works.</p>
-      <p><b>Ranked matches.</b> When a ranked online debate ends, our server sends the debate topic and the text transcript of what each side said (words only: no audio, and no names or account details) to Groq, which acts as an AI judge and returns a winner (or a draw) and a short reason. The main Groq model is used, with the second one as a backup. The transcript text is what each debater's browser reported from speech recognition, so it can contain mistakes, and the judge can be wrong. Casual online matches are never sent to the judge. Ratings never use the live fact-check scores.</p>
+      <p><b>Ranked matches.</b> When a ranked online debate ends, our server sends the debate topic and the text transcript of what each side said (words only: no audio, and no names or account details) to Groq, which acts as an AI judge and returns a winner (or a draw) and a short reason. The main Groq model is used, with the second one as a backup. The transcript text is what each debater's browser reported from speech recognition, so it can contain mistakes, and the judge can be wrong. Casual online matches are never sent to the judge. Ratings never use the score counters. The judge is also told how many facts, false claims and fallacies the automatic checks found for each side, as a minor hint, and returns a short 1-5 rating of each side's argument, evidence, rebuttal and clarity, which both players can see.</p>
       <p><b>Study sets and Mock Trial tools.</b> Flashcards, quizzes, matching games, and the objection and fallacy trainers run entirely in your browser; your progress is saved only in your browser's local storage. The Mock Trial case files are fictional practice material. The objection log is kept in your browser's memory for the round and shown on the results page; in Online Debate it is not shared.</p>
       <p><b>Held-back claims.</b> Claims that need a real lookup are kept in your browser's memory during the speech, verified when that person finishes speaking, and are not saved anywhere when you leave the page.</p>
       <p><b>AI judge, argument analysis, Case Checker, Case Builder, Respect Filter (when you turn it on), and the manual fact-check box.</b> The text you type, or the transcript of your round, plus the debater names and topic you entered where the feature uses them, is sent to Groq through our server. If in Setup you choose Anthropic or OpenAI and enter your own key for that account, those requests go from your browser straight to that company under its terms instead; your key is kept in your browser's memory for that session and is not saved by us.</p>
@@ -3588,6 +3609,32 @@ const FALLACIES = [
    ========================================================================= */
 const TRANSLATIONS = {
   en: {
+    "online.eval.unchecked": "Couldn't be checked in time.",
+    "online.eval.reviews": "Coaching on your turns",
+    "online.eval.yours": "What the AI found in your speeches",
+    "rank.rubric.clarity": "Clarity",
+    "rank.rubric.rebuttal": "Rebuttal",
+    "rank.rubric.evidence": "Evidence",
+    "rank.rubric.argument": "Argument",
+    "rank.rubric.title": "How the judge scored it",
+    "rank.how.rules": "In ranked matches the score comes from the AI only, ending the debate early needs both players to agree, and each turn allows 30 seconds of pause.",
+    "rank.note.agreed": "{name}: score changed by agreement",
+    "rank.pause.rule": "Ranked matches allow 30 seconds of pause per turn.",
+    "rank.pause.note": "Paused. The clock restarts by itself in {n} s.",
+    "rank.pause.none": "No pause left",
+    "rank.pause.left": "Pause ({n}s left)",
+    "rank.score.note": "In a ranked match, scores come from the AI only. These buttons ask your opponent to agree.",
+    "rank.agree.sent": "Asked your opponent. Nothing changes unless they agree.",
+    "rank.agree.cancel": "Cancel request",
+    "rank.agree.no": "Decline",
+    "rank.agree.yes": "Agree",
+    "rank.agree.wait.score": "Waiting for {name} to agree to the score change…",
+    "rank.agree.wait.end": "Waiting for {name} to agree to end the debate…",
+    "rank.agree.kind.fallacy": "a logical fallacy (−2)",
+    "rank.agree.kind.wrong": "a wrong claim (−1)",
+    "rank.agree.kind.fact": "a verified fact (+1)",
+    "rank.agree.score.ask": "{name} wants to give {target} {kind}. Do you agree?",
+    "rank.agree.end.ask": "{name} wants to end the debate now. Do you agree?",
     "how.privacy.rank": "In a ranked match, an AI judge reads the text of what both sides said (no audio) to pick a winner, and we save your rating and match history on your account.",
     "rank.notice.joined": "This is a ranked match. An AI judge will pick the winner when it ends.",
     "rank.casual.note": "Casual match: no rating change.",
@@ -4096,6 +4143,32 @@ const TRANSLATIONS = {
     "cookie.gotit": "Got it",
   },
   es: {
+    "online.eval.unchecked": "No se pudo comprobar a tiempo.",
+    "online.eval.reviews": "Consejos sobre tus turnos",
+    "online.eval.yours": "Lo que encontró la IA en tus intervenciones",
+    "rank.rubric.clarity": "Claridad",
+    "rank.rubric.rebuttal": "Refutación",
+    "rank.rubric.evidence": "Pruebas",
+    "rank.rubric.argument": "Argumento",
+    "rank.rubric.title": "Cómo lo puntuó el juez",
+    "rank.how.rules": "En las partidas clasificatorias la puntuación viene solo de la IA, terminar el debate antes de tiempo requiere el acuerdo de ambos jugadores y cada turno permite 30 segundos de pausa.",
+    "rank.note.agreed": "{name}: puntuación cambiada de común acuerdo",
+    "rank.pause.rule": "Las partidas clasificatorias permiten 30 segundos de pausa por turno.",
+    "rank.pause.note": "En pausa. El reloj se reanuda solo en {n} s.",
+    "rank.pause.none": "Sin pausa disponible",
+    "rank.pause.left": "Pausa (quedan {n} s)",
+    "rank.score.note": "En una partida clasificatoria, las puntuaciones las pone solo la IA. Estos botones piden el acuerdo de tu oponente.",
+    "rank.agree.sent": "Se lo pediste a tu oponente. Nada cambia si no acepta.",
+    "rank.agree.cancel": "Cancelar solicitud",
+    "rank.agree.no": "Rechazar",
+    "rank.agree.yes": "Estoy de acuerdo",
+    "rank.agree.wait.score": "Esperando a que {name} acepte el cambio de puntuación…",
+    "rank.agree.wait.end": "Esperando a que {name} acepte terminar el debate…",
+    "rank.agree.kind.fallacy": "una falacia lógica (−2)",
+    "rank.agree.kind.wrong": "una afirmación falsa (−1)",
+    "rank.agree.kind.fact": "un dato verificado (+1)",
+    "rank.agree.score.ask": "{name} quiere dar a {target} {kind}. ¿Estás de acuerdo?",
+    "rank.agree.end.ask": "{name} quiere terminar el debate ahora. ¿Estás de acuerdo?",
     "how.privacy.rank": "En una partida clasificatoria, un juez de IA lee el texto de lo que dijeron ambos lados (sin audio) para elegir al ganador, y guardamos tu puntuación y tu historial de partidas en tu cuenta.",
     "rank.notice.joined": "Esta es una partida clasificatoria. Un juez de IA elegirá al ganador cuando termine.",
     "rank.casual.note": "Partida casual: sin cambio de puntuación.",
@@ -4604,6 +4677,32 @@ const TRANSLATIONS = {
     "cookie.gotit": "Entendido",
   },
   fr: {
+    "online.eval.unchecked": "N'a pas pu être vérifié à temps.",
+    "online.eval.reviews": "Conseils sur vos tours de parole",
+    "online.eval.yours": "Ce que l'IA a relevé dans vos interventions",
+    "rank.rubric.clarity": "Clarté",
+    "rank.rubric.rebuttal": "Réfutation",
+    "rank.rubric.evidence": "Preuves",
+    "rank.rubric.argument": "Argument",
+    "rank.rubric.title": "Comment le juge a noté",
+    "rank.how.rules": "Dans les parties classées, le score vient uniquement de l'IA, mettre fin au débat plus tôt demande l'accord des deux joueurs, et chaque tour autorise 30 secondes de pause.",
+    "rank.note.agreed": "{name} : score modifié d'un commun accord",
+    "rank.pause.rule": "Les parties classées autorisent 30 secondes de pause par tour.",
+    "rank.pause.note": "En pause. Le chrono repart tout seul dans {n} s.",
+    "rank.pause.none": "Plus de pause",
+    "rank.pause.left": "Pause ({n} s restantes)",
+    "rank.score.note": "Dans une partie classée, les scores viennent uniquement de l'IA. Ces boutons demandent l'accord de votre adversaire.",
+    "rank.agree.sent": "Demande envoyée à votre adversaire. Rien ne change sans son accord.",
+    "rank.agree.cancel": "Annuler la demande",
+    "rank.agree.no": "Refuser",
+    "rank.agree.yes": "D'accord",
+    "rank.agree.wait.score": "En attente de l'accord de {name} pour le changement de score…",
+    "rank.agree.wait.end": "En attente de l'accord de {name} pour mettre fin au débat…",
+    "rank.agree.kind.fallacy": "un sophisme (−2)",
+    "rank.agree.kind.wrong": "une affirmation fausse (−1)",
+    "rank.agree.kind.fact": "un fait vérifié (+1)",
+    "rank.agree.score.ask": "{name} veut attribuer à {target} {kind}. Êtes-vous d'accord ?",
+    "rank.agree.end.ask": "{name} veut mettre fin au débat maintenant. Êtes-vous d'accord ?",
     "how.privacy.rank": "Dans une partie classée, un juge IA lit le texte de ce que les deux camps ont dit (sans audio) pour désigner le gagnant, et nous enregistrons votre score et votre historique de parties sur votre compte.",
     "rank.notice.joined": "C'est une partie classée. Un juge IA désignera le gagnant à la fin.",
     "rank.casual.note": "Partie amicale : aucun changement de score.",
@@ -5227,6 +5326,32 @@ const TRANSLATIONS = {
     "upload.lang.ru": "Russe",
   },
   de: {
+    "online.eval.unchecked": "Konnte nicht rechtzeitig geprüft werden.",
+    "online.eval.reviews": "Coaching zu deinen Beiträgen",
+    "online.eval.yours": "Was die KI in deinen Beiträgen gefunden hat",
+    "rank.rubric.clarity": "Klarheit",
+    "rank.rubric.rebuttal": "Widerlegung",
+    "rank.rubric.evidence": "Belege",
+    "rank.rubric.argument": "Argument",
+    "rank.rubric.title": "So hat die Jury bewertet",
+    "rank.how.rules": "In gewerteten Debatten kommt der Punktestand nur von der KI, ein vorzeitiges Ende braucht die Zustimmung beider Spielenden, und pro Beitrag sind 30 Sekunden Pause erlaubt.",
+    "rank.note.agreed": "{name}: Punktestand im Einvernehmen geändert",
+    "rank.pause.rule": "In gewerteten Debatten sind pro Beitrag 30 Sekunden Pause erlaubt.",
+    "rank.pause.note": "Pausiert. Die Uhr läuft in {n} s von selbst weiter.",
+    "rank.pause.none": "Keine Pause mehr",
+    "rank.pause.left": "Pause (noch {n} s)",
+    "rank.score.note": "In einer gewerteten Debatte kommen die Punkte nur von der KI. Diese Schaltflächen fragen deinen Gegner um Zustimmung.",
+    "rank.agree.sent": "Anfrage an deine Gegnerin oder deinen Gegner geschickt. Ohne Zustimmung ändert sich nichts.",
+    "rank.agree.cancel": "Anfrage zurückziehen",
+    "rank.agree.no": "Ablehnen",
+    "rank.agree.yes": "Zustimmen",
+    "rank.agree.wait.score": "Warte darauf, dass {name} der Punkteänderung zustimmt…",
+    "rank.agree.wait.end": "Warte darauf, dass {name} dem Ende der Debatte zustimmt…",
+    "rank.agree.kind.fallacy": "einen Fehlschluss (−2)",
+    "rank.agree.kind.wrong": "eine falsche Behauptung (−1)",
+    "rank.agree.kind.fact": "einen bestätigten Fakt (+1)",
+    "rank.agree.score.ask": "{name} möchte {target} {kind} geben. Stimmst du zu?",
+    "rank.agree.end.ask": "{name} möchte die Debatte jetzt beenden. Stimmst du zu?",
     "how.privacy.rank": "Bei einer gewerteten Debatte liest eine KI-Jury den Text dessen, was beide Seiten gesagt haben (kein Audio), um den Sieger zu bestimmen, und wir speichern deine Wertung und deinen Spielverlauf in deinem Konto.",
     "rank.notice.joined": "Das ist eine gewertete Debatte. Eine KI-Jury bestimmt am Ende den Sieger.",
     "rank.casual.note": "Casual-Debatte: keine Wertungsänderung.",
@@ -5850,6 +5975,32 @@ const TRANSLATIONS = {
     "upload.lang.ru": "Russisch",
   },
   it: {
+    "online.eval.unchecked": "Non è stato possibile verificarlo in tempo.",
+    "online.eval.reviews": "Consigli sui tuoi turni",
+    "online.eval.yours": "Cosa ha trovato l'IA nei tuoi interventi",
+    "rank.rubric.clarity": "Chiarezza",
+    "rank.rubric.rebuttal": "Confutazione",
+    "rank.rubric.evidence": "Prove",
+    "rank.rubric.argument": "Argomento",
+    "rank.rubric.title": "Come ha valutato il giudice",
+    "rank.how.rules": "Nelle partite classificate il punteggio arriva solo dall'IA, terminare prima il dibattito richiede il consenso di entrambi i giocatori e ogni turno permette 30 secondi di pausa.",
+    "rank.note.agreed": "{name}: punteggio modificato di comune accordo",
+    "rank.pause.rule": "Le partite classificate permettono 30 secondi di pausa per turno.",
+    "rank.pause.note": "In pausa. Il timer riparte da solo tra {n} s.",
+    "rank.pause.none": "Nessuna pausa rimasta",
+    "rank.pause.left": "Pausa ({n} s rimasti)",
+    "rank.score.note": "In una partita classificata i punteggi arrivano solo dall'IA. Questi pulsanti chiedono il consenso del tuo avversario.",
+    "rank.agree.sent": "Richiesta inviata al tuo avversario. Non cambia nulla senza il suo consenso.",
+    "rank.agree.cancel": "Annulla richiesta",
+    "rank.agree.no": "Rifiuta",
+    "rank.agree.yes": "D'accordo",
+    "rank.agree.wait.score": "In attesa che {name} accetti la modifica del punteggio…",
+    "rank.agree.wait.end": "In attesa che {name} accetti di terminare il dibattito…",
+    "rank.agree.kind.fallacy": "una fallacia logica (−2)",
+    "rank.agree.kind.wrong": "un'affermazione errata (−1)",
+    "rank.agree.kind.fact": "un fatto verificato (+1)",
+    "rank.agree.score.ask": "{name} vuole assegnare a {target} {kind}. Sei d'accordo?",
+    "rank.agree.end.ask": "{name} vuole terminare il dibattito adesso. Sei d'accordo?",
     "how.privacy.rank": "In una partita classificata, un giudice IA legge il testo di ciò che hanno detto entrambi i lati (senza audio) per scegliere il vincitore, e salviamo il tuo punteggio e la cronologia delle partite nel tuo account.",
     "rank.notice.joined": "Questa è una partita classificata. Un giudice IA sceglierà il vincitore alla fine.",
     "rank.casual.note": "Partita amichevole: nessuna variazione di punteggio.",
@@ -6473,6 +6624,32 @@ const TRANSLATIONS = {
     "upload.lang.ru": "Russo",
   },
   pt: {
+    "online.eval.unchecked": "Não deu para verificar a tempo.",
+    "online.eval.reviews": "Dicas sobre as suas vezes",
+    "online.eval.yours": "O que a IA encontrou nas suas falas",
+    "rank.rubric.clarity": "Clareza",
+    "rank.rubric.rebuttal": "Refutação",
+    "rank.rubric.evidence": "Provas",
+    "rank.rubric.argument": "Argumento",
+    "rank.rubric.title": "Como o juiz pontuou",
+    "rank.how.rules": "Em partidas ranqueadas a pontuação vem apenas da IA, encerrar o debate antes da hora exige a concordância dos dois jogadores e cada vez permite 30 segundos de pausa.",
+    "rank.note.agreed": "{name}: pontuação alterada de comum acordo",
+    "rank.pause.rule": "Partidas ranqueadas permitem 30 segundos de pausa por vez.",
+    "rank.pause.note": "Em pausa. O relógio volta sozinho em {n} s.",
+    "rank.pause.none": "Sem pausa restante",
+    "rank.pause.left": "Pausa ({n} s restantes)",
+    "rank.score.note": "Em uma partida ranqueada, a pontuação vem apenas da IA. Estes botões pedem a concordância do seu oponente.",
+    "rank.agree.sent": "Pedido enviado ao seu oponente. Nada muda se ele não concordar.",
+    "rank.agree.cancel": "Cancelar pedido",
+    "rank.agree.no": "Recusar",
+    "rank.agree.yes": "Concordo",
+    "rank.agree.wait.score": "Esperando {name} concordar com a mudança de pontuação…",
+    "rank.agree.wait.end": "Esperando {name} concordar em encerrar o debate…",
+    "rank.agree.kind.fallacy": "uma falácia lógica (−2)",
+    "rank.agree.kind.wrong": "uma afirmação errada (−1)",
+    "rank.agree.kind.fact": "um fato verificado (+1)",
+    "rank.agree.score.ask": "{name} quer dar a {target} {kind}. Você concorda?",
+    "rank.agree.end.ask": "{name} quer encerrar o debate agora. Você concorda?",
     "how.privacy.rank": "Em uma partida ranqueada, um juiz de IA lê o texto do que os dois lados disseram (sem áudio) para escolher o vencedor, e guardamos sua pontuação e seu histórico de partidas na sua conta.",
     "rank.notice.joined": "Esta é uma partida ranqueada. Um juiz de IA escolherá o vencedor quando terminar.",
     "rank.casual.note": "Partida casual: sem mudança de pontuação.",
@@ -7096,6 +7273,32 @@ const TRANSLATIONS = {
     "upload.lang.ru": "Russo",
   },
   pl: {
+    "online.eval.unchecked": "Nie udało się sprawdzić na czas.",
+    "online.eval.reviews": "Wskazówki do Twoich tur",
+    "online.eval.yours": "Co AI znalazła w Twoich wypowiedziach",
+    "rank.rubric.clarity": "Jasność",
+    "rank.rubric.rebuttal": "Odpieranie zarzutów",
+    "rank.rubric.evidence": "Dowody",
+    "rank.rubric.argument": "Argumentacja",
+    "rank.rubric.title": "Jak ocenił sędzia",
+    "rank.how.rules": "W meczach rankingowych punkty przyznaje tylko AI, wcześniejsze zakończenie debaty wymaga zgody obu graczy, a na każdą turę przysługuje 30 sekund pauzy.",
+    "rank.note.agreed": "{name}: wynik zmieniony za obopólną zgodą",
+    "rank.pause.rule": "W meczach rankingowych na każdą turę przysługuje 30 sekund pauzy.",
+    "rank.pause.note": "Wstrzymano. Zegar ruszy sam za {n} s.",
+    "rank.pause.none": "Brak pauzy",
+    "rank.pause.left": "Pauza (zostało {n} s)",
+    "rank.score.note": "W meczu rankingowym punkty przyznaje tylko AI. Te przyciski proszą przeciwnika o zgodę.",
+    "rank.agree.sent": "Wysłano prośbę do przeciwnika. Nic się nie zmieni bez jego zgody.",
+    "rank.agree.cancel": "Anuluj prośbę",
+    "rank.agree.no": "Odrzuć",
+    "rank.agree.yes": "Zgadzam się",
+    "rank.agree.wait.score": "Czekamy, aż {name} zgodzi się na zmianę wyniku…",
+    "rank.agree.wait.end": "Czekamy, aż {name} zgodzi się zakończyć debatę…",
+    "rank.agree.kind.fallacy": "błąd logiczny (−2)",
+    "rank.agree.kind.wrong": "błędne twierdzenie (−1)",
+    "rank.agree.kind.fact": "zweryfikowany fakt (+1)",
+    "rank.agree.score.ask": "{name} chce przyznać: {target} – {kind}. Zgadzasz się?",
+    "rank.agree.end.ask": "{name} chce teraz zakończyć debatę. Zgadzasz się?",
     "how.privacy.rank": "W meczu rankingowym sędzia AI czyta tekst wypowiedzi obu stron (bez dźwięku), aby wybrać zwycięzcę, a Twój ranking i historię meczów zapisujemy na Twoim koncie.",
     "rank.notice.joined": "To mecz rankingowy. Sędzia AI wybierze zwycięzcę po jego zakończeniu.",
     "rank.casual.note": "Mecz towarzyski: bez zmiany rankingu.",
@@ -7719,6 +7922,32 @@ const TRANSLATIONS = {
     "upload.lang.ru": "Rosyjski",
   },
   ja: {
+    "online.eval.unchecked": "時間内に確認できませんでした。",
+    "online.eval.reviews": "あなたのターンへのコーチング",
+    "online.eval.yours": "あなたの発言でAIが見つけたこと",
+    "rank.rubric.clarity": "明確さ",
+    "rank.rubric.rebuttal": "反論",
+    "rank.rubric.evidence": "根拠",
+    "rank.rubric.argument": "論点",
+    "rank.rubric.title": "審査員の採点",
+    "rank.how.rules": "ランク戦ではスコアはAIだけが付け、途中で終了するには両者の同意が必要で、1ターンにつき30秒まで一時停止できます。",
+    "rank.note.agreed": "{name}：双方の同意でスコアが変更されました",
+    "rank.pause.rule": "ランク戦では、1ターンにつき30秒まで一時停止できます。",
+    "rank.pause.note": "一時停止中。あと{n}秒でタイマーが自動的に再開します。",
+    "rank.pause.none": "一時停止は使い切りました",
+    "rank.pause.left": "一時停止（残り{n}秒）",
+    "rank.score.note": "ランク戦のスコアはAIだけが付けます。これらのボタンは相手に同意を求めるものです。",
+    "rank.agree.sent": "相手に確認しました。同意がなければ何も変わりません。",
+    "rank.agree.cancel": "リクエストを取り消す",
+    "rank.agree.no": "断る",
+    "rank.agree.yes": "同意する",
+    "rank.agree.wait.score": "{name} さんがスコア変更に同意するのを待っています…",
+    "rank.agree.wait.end": "{name} さんがディベート終了に同意するのを待っています…",
+    "rank.agree.kind.fallacy": "論理の誤り (−2)",
+    "rank.agree.kind.wrong": "誤った主張 (−1)",
+    "rank.agree.kind.fact": "確認済みの事実 (+1)",
+    "rank.agree.score.ask": "{name} さんが {target} に「{kind}」を付けたいと言っています。同意しますか？",
+    "rank.agree.end.ask": "{name} さんが今すぐディベートを終了したいと言っています。同意しますか？",
     "how.privacy.rank": "ランク戦では、AI審査員が双方の発言のテキスト（音声は含みません）を読んで勝者を決め、レーティングと試合履歴はあなたのアカウントに保存されます。",
     "rank.notice.joined": "これはランク戦です。終了時にAI審査員が勝者を決めます。",
     "rank.casual.note": "カジュアル戦：レーティングは変わりません。",
@@ -8342,6 +8571,32 @@ const TRANSLATIONS = {
     "upload.lang.ru": "ロシア語",
   },
   zh: {
+    "online.eval.unchecked": "未能及时核查。",
+    "online.eval.reviews": "对你各回合的指导",
+    "online.eval.yours": "AI 在你的发言中发现了什么",
+    "rank.rubric.clarity": "清晰度",
+    "rank.rubric.rebuttal": "反驳",
+    "rank.rubric.evidence": "证据",
+    "rank.rubric.argument": "论点",
+    "rank.rubric.title": "裁判的评分",
+    "rank.how.rules": "排位赛的比分只由 AI 给出，提前结束辩论需要双方同意，每个回合最多可暂停 30 秒。",
+    "rank.note.agreed": "{name}：经双方同意修改了比分",
+    "rank.pause.rule": "排位赛每个回合最多可暂停 30 秒。",
+    "rank.pause.note": "已暂停。{n} 秒后计时会自动继续。",
+    "rank.pause.none": "没有剩余暂停时间",
+    "rank.pause.left": "暂停（剩余 {n} 秒）",
+    "rank.score.note": "排位赛的比分只由 AI 给出。这些按钮会征求对手的同意。",
+    "rank.agree.sent": "已询问你的对手。对方不同意就不会有任何变化。",
+    "rank.agree.cancel": "取消请求",
+    "rank.agree.no": "拒绝",
+    "rank.agree.yes": "同意",
+    "rank.agree.wait.score": "正在等待 {name} 同意修改比分…",
+    "rank.agree.wait.end": "正在等待 {name} 同意结束辩论…",
+    "rank.agree.kind.fallacy": "逻辑谬误 (−2)",
+    "rank.agree.kind.wrong": "错误的说法 (−1)",
+    "rank.agree.kind.fact": "已证实的事实 (+1)",
+    "rank.agree.score.ask": "{name} 想给 {target} 记一次“{kind}”。你同意吗？",
+    "rank.agree.end.ask": "{name} 想现在结束辩论。你同意吗？",
     "how.privacy.rank": "在排位赛中，AI 裁判会阅读双方发言的文字（不含音频）来决出胜者，我们会把你的积分和比赛记录保存在你的账户中。",
     "rank.notice.joined": "这是一场排位赛。比赛结束时将由 AI 裁判决出胜者。",
     "rank.casual.note": "休闲对局：不改变积分。",
@@ -8965,6 +9220,32 @@ const TRANSLATIONS = {
     "upload.lang.ru": "俄语",
   },
   ru: {
+    "online.eval.unchecked": "Не удалось проверить вовремя.",
+    "online.eval.reviews": "Советы по вашим ходам",
+    "online.eval.yours": "Что ИИ нашёл в ваших выступлениях",
+    "rank.rubric.clarity": "Ясность",
+    "rank.rubric.rebuttal": "Опровержение",
+    "rank.rubric.evidence": "Доказательства",
+    "rank.rubric.argument": "Аргументы",
+    "rank.rubric.title": "Как оценил судья",
+    "rank.how.rules": "В рейтинговых играх очки ставит только ИИ, досрочное завершение требует согласия обоих игроков, а на каждый ход даётся 30 секунд паузы.",
+    "rank.note.agreed": "{name}: счёт изменён по согласию обеих сторон",
+    "rank.pause.rule": "В рейтинговых играх на каждый ход даётся 30 секунд паузы.",
+    "rank.pause.note": "Пауза. Таймер сам запустится через {n} с.",
+    "rank.pause.none": "Пауза закончилась",
+    "rank.pause.left": "Пауза (осталось {n} с)",
+    "rank.score.note": "В рейтинговой игре очки ставит только ИИ. Эти кнопки спрашивают согласие соперника.",
+    "rank.agree.sent": "Запрос отправлен сопернику. Без его согласия ничего не изменится.",
+    "rank.agree.cancel": "Отменить запрос",
+    "rank.agree.no": "Отклонить",
+    "rank.agree.yes": "Согласен",
+    "rank.agree.wait.score": "Ждём, пока {name} согласится изменить счёт…",
+    "rank.agree.wait.end": "Ждём, пока {name} согласится закончить дебаты…",
+    "rank.agree.kind.fallacy": "логическую ошибку (−2)",
+    "rank.agree.kind.wrong": "ложное утверждение (−1)",
+    "rank.agree.kind.fact": "подтверждённый факт (+1)",
+    "rank.agree.score.ask": "{name} хочет записать {target}: {kind}. Вы согласны?",
+    "rank.agree.end.ask": "{name} хочет закончить дебаты сейчас. Вы согласны?",
     "how.privacy.rank": "В рейтинговой игре ИИ-судья читает текст сказанного обеими сторонами (без аудио), чтобы выбрать победителя, а ваш рейтинг и историю игр мы сохраняем в вашем аккаунте.",
     "rank.notice.joined": "Это рейтинговая игра. По окончании ИИ-судья выберет победителя.",
     "rank.casual.note": "Обычная игра: рейтинг не меняется.",
@@ -11372,7 +11653,8 @@ function noteNewScores(room) {
   log.filter(e => e.ts > seen.ts).forEach(e => {
     const name = e.side === "a" ? room.hostName : (room.guestName || "");
     const label = String(e.label || "");
-    if (label === "fact") quietNotice(t("online.note.fact").replace("{name}", name), "good");
+    if (label.indexOf("agreed:") === 0) quietNotice(t("rank.note.agreed").replace("{name}", name), "warn");
+    else if (label === "fact") quietNotice(t("online.note.fact").replace("{name}", name), "good");
     else if (label === "wrong") quietNotice(t("online.note.wrong").replace("{name}", name), "bad");
     else quietNotice(t("online.note.fallacy").replace("{name}", name).replace("{label}", label), "warn");
   });
@@ -11458,25 +11740,28 @@ function queueOnlineFactCheck(chunk) {
 }
 
 async function runOneOnlineFactCheck(sentence, side, opts) {
+  const code = state.onlineRoom && state.onlineRoom.roomCode;
   try {
     const cfg = window.APP_CONFIG || {};
-    const evidence = await groundingFor(sentence);
+    // Live checks stay fast: no lookups mid-speech. Anything that needs one waits for the end of the speech.
+    const evidence = cfg.USE_WIKIPEDIA_GROUNDING ? await groundingFor(sentence) : [];
     const combined = await runCombinedCheck(sentence, Object.assign({}, opts, { evidence, wantFallacies: !!cfg.AUTO_FALLACY_DETECTION }));
-    if (!state.onlineRoom || state.onlineRoom.currentSide !== side) return; // turn already moved on — stale result
+    // Still the same room? (A result that lands just after the turn ended still belongs to this speaker.)
+    if (!state.onlineRoom || state.onlineRoom.roomCode !== code) return;
 
     if (cfg.AUTO_FALLACY_DETECTION) {
       normalizeFallacies(combined).forEach(f => {
         if (f.confidence < (cfg.AUTO_FALLACY_MIN_CONF ?? 0.65)) return;
-        scoreOnline(side, "fallacy", -2, ("fallacy: " + f.fallacy + (f.explanation ? " — " + f.explanation : "")).slice(0, 118));
+        scoreOnline(side, "fallacy", -2, ("fallacy: " + f.fallacy + (f.explanation ? " — " + f.explanation : "")).slice(0, 118), true);
       });
     }
 
     const claims = normalizeClaims(combined);
-    const minConf = cfg.AUTO_FACTCHECK_CONFIDENCE ?? 0.7;
-    claims.slice(0, 3).forEach(c => {
-      if (c.confidence < minConf) return;
-      if (c.verdict === "true") scoreOnline(side, "fact", 1, "fact");
-      else if (c.verdict === "false") scoreOnline(side, "wrong", -1, "wrong");
+    // Claims about recent events can't be trusted from memory: they wait for the end of the speech and a Wikipedia check.
+    if (!evidence.length) claims.forEach(c => { if (SCORED_VERDICTS[c.verdict] && RECENT_RE.test(c.claim)) c.verdict = "pending"; });
+    claims.slice(0, 5).forEach(c => {
+      const entry = { claim: c.claim, kind: c.kind, verdict: c.verdict, confidence: c.confidence, explanation: c.explanation, citation: c.citation, side };
+      if (window.OnlineEval) { OnlineEval.addClaim(entry); if (SCORED_VERDICTS[c.verdict]) OnlineEval.scoreClaim(entry); }
     });
   } catch (e) {
     console.warn("Online fact-check failed:", e.message || e);
@@ -11596,6 +11881,12 @@ async function endOnlineTurn() {
   const text = (state.onlineLiveText || "").trim();
   state.onlineLiveText = "";
   if (window.OnlineVoice) OnlineVoice.sendLive("");
+  // The sentences the live check never reached, the held-back claims, and a short review of this turn are handled on this device.
+  const leftover = ((state.onlineAfcBatch && state.onlineAfcBatch.pending) || []).filter(i => i.side === room.currentSide).slice(-4).map(i => i.sentence);
+  resetFactCheckBatch(state.onlineAfcBatch);
+  if (window.OnlineEval && (room.currentSide === "a" || room.currentSide === "b") && room.yourSide === room.currentSide) {
+    OnlineEval.endOfTurn({ room, side: room.currentSide, phaseName, text, topic: room.topic || "", leftover });
+  }
   try {
     await onlineRoomAction({
       action: "next_turn",
@@ -11618,17 +11909,37 @@ function continueOnlineCrossfire() {
   endOnlineTurn();
 }
 
-async function scoreOnline(side, type, delta, label) {
+async function scoreOnline(side, type, delta, label, auto) {
   if (!state.onlineRoom) return;
   try {
-    await onlineRoomAction({ action: "score", side, delta, label: label || type });
+    // In a ranked match scores come from the AI only; the buttons ask the opponent to agree instead.
+    if (state.onlineRoom.ranked && !auto) { await proposeOnline("score", { side, type }); return; }
+    await onlineRoomAction({ action: "score", side, delta, label: label || type, auto: !!auto });
   } catch (e) {
     toast("Couldn't score that. " + friendlyError(e), "error");
   }
 }
 
+async function proposeOnline(kind, extra) {
+  await onlineRoomAction(Object.assign({ action: "propose", kind }, extra || {}));
+  quietNotice(t("rank.agree.sent"), "warn");
+}
+
+async function respondOnline(accept) {
+  try {
+    await onlineRoomAction({ action: "respond", accept: !!accept });
+  } catch (e) {
+    toast(friendlyError(e), "error");
+  }
+}
+
 async function endOnlineDebateNow() {
   if (!state.onlineRoom) return;
+  if (state.onlineRoom.ranked) {
+    // Ending a ranked match early needs both players to agree.
+    try { await proposeOnline("end"); } catch (e) { toast(friendlyError(e), "error"); }
+    return;
+  }
   stopOnlineMic();
   if (window.OnlineVoice) OnlineVoice.sendLive("");
   try {
@@ -11653,6 +11964,7 @@ function renderOnlineTranscript(room) {
 function renderOnlineRoom() {
   const room = state.onlineRoom;
   if (!room) return;
+  if (window.OnlineEval) OnlineEval.sync(room);
 
   const waitingEl = document.getElementById("online-waiting");
   const activeEl = document.getElementById("online-active");
@@ -11675,6 +11987,7 @@ function renderOnlineRoom() {
       `${room.hostName} ${room.scoreA} – ${room.scoreB} ${room.guestName || "Guest"}`;
     document.getElementById("online-final-transcript").innerHTML = renderOnlineTranscript(room);
     populateOnlineJudgePersonas(room);
+    if (window.OnlineEval) OnlineEval.render();
     stopOnlinePolling();
     stopOnlineMic();
     clearOnlineRoomCode();
@@ -15601,6 +15914,7 @@ init();
 <script src="study.js"></script>
 <script src="mocktrial.js"></script>
 <script src="voice.js"></script>
+<script src="onlineeval.js"></script>
 <script src="rank.js"></script>
 <script src="league.js"></script>
 </body>
