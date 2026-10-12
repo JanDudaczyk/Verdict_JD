@@ -460,6 +460,55 @@ footer{
   .sched-form{border-left:0;border-top:1px solid var(--gray-5)}
   .sched-pick,.sched-form,.sched-done{padding:24px 20px}
 }
+
+/* ---- fill-in pass: bands, big numerals, example dashboard ---- */
+.section.stat-band,.section.product-section{border-bottom:0}
+.stat-band{background:var(--red);color:var(--white)}
+.stat-band h2{color:var(--white)}
+.stat-band .kicker{color:var(--white);border-color:rgba(250,250,248,0.75)}
+.stat-row{display:grid;grid-template-columns:1fr 1fr 1.15fr;gap:56px;align-items:end;margin-top:56px}
+.stat-num{font-family:var(--font-display);font-size:clamp(88px,12vw,168px);font-weight:900;line-height:.86;letter-spacing:-6px;font-variation-settings:"opsz" 144;margin-bottom:18px}
+.stat-num span{font-size:.5em;letter-spacing:-2px;vertical-align:top;margin-left:4px}
+.stat-big p{font-size:17px;line-height:1.5;max-width:30ch}
+.stat-big small{display:block;margin-top:12px;font-size:11px;letter-spacing:.3px;opacity:.65}
+.stat-copy{font-family:var(--font-display);font-size:clamp(20px,2vw,26px);line-height:1.35;font-weight:600;letter-spacing:-.4px;padding-left:40px;border-left:2px solid rgba(250,250,248,0.55)}
+.stat-copy strong{font-weight:900}
+@media(max-width:1000px){.stat-row{grid-template-columns:1fr 1fr}.stat-copy{grid-column:1 / -1;padding-left:20px}}
+@media(max-width:560px){.stat-row{grid-template-columns:1fr;gap:40px}.stat-num{letter-spacing:-4px}}
+
+.product-section .kicker{color:var(--white);border-color:rgba(250,250,248,0.6)}
+.product-section .how-grid{border-color:rgba(250,250,248,0.14)}
+.product-section .how-item{border-color:rgba(250,250,248,0.14)}
+.product-section .how-num{color:var(--red)}
+.product-section .how-item h4{color:var(--white);font-size:17px}
+.product-section .how-item p{color:rgba(250,250,248,0.6);font-size:14px}
+
+.coach-layout{display:grid;grid-template-columns:1.05fr 1fr;gap:56px;align-items:start;margin-top:8px}
+.coach-layout .coach-steps{grid-template-columns:1fr;gap:12px}
+.coach-layout .coach-step{display:grid;grid-template-columns:28px 1fr;column-gap:14px;align-items:center;padding:14px 18px}
+.coach-layout .coach-step .coach-n{grid-row:1 / span 2}
+.coach-layout .coach-step h4{margin:0 0 2px}
+.coach-layout .coach-step p{margin:0}
+@media(max-width:960px){.coach-layout{grid-template-columns:1fr;gap:40px}}
+.coach-demo{background:var(--black);color:var(--white);border-radius:0;padding:0;box-shadow:10px 10px 0 var(--red);margin:28px 10px 10px 0;overflow:hidden}
+.cd-bar{display:flex;justify-content:space-between;align-items:center;padding:14px 20px;border-bottom:1px solid rgba(250,250,248,0.14);font-size:14px;font-weight:600}
+.cd-tag{font:600 10px var(--font-mono);letter-spacing:.14em;text-transform:uppercase;color:rgba(250,250,248,0.55);border:1px solid rgba(250,250,248,0.3);padding:2px 7px}
+.cd-totals{display:grid;grid-template-columns:repeat(3,1fr);border-bottom:1px solid rgba(250,250,248,0.14)}
+.cd-totals div{padding:16px 20px;font-size:12px;color:rgba(250,250,248,0.55);border-right:1px solid rgba(250,250,248,0.14)}
+.cd-totals div:last-child{border-right:0}
+.cd-totals b{display:block;font-family:var(--font-display);font-size:34px;line-height:1;letter-spacing:-1px;color:var(--white);margin-bottom:4px}
+.cd-weeks{display:flex;align-items:flex-end;gap:8px;height:110px;padding:16px 20px 0;border-bottom:1px solid rgba(250,250,248,0.14)}
+.cd-weeks i{flex:1;background:var(--red);min-height:4px}
+.cd-table{width:100%;border-collapse:collapse;font-size:13px}
+.cd-table th{text-align:left;font-weight:500;font-size:11px;color:rgba(250,250,248,0.45);padding:12px 20px 8px}
+.cd-table td{padding:10px 20px;border-top:1px solid rgba(250,250,248,0.1);color:rgba(250,250,248,0.85)}
+.cd-flag{font-size:11px;font-weight:600;background:rgba(179,20,31,0.25);color:#FFB3B8;padding:2px 7px}
+
+.team-band{background:var(--gray-6)}
+.team-band .team-grid{background:transparent;gap:20px}
+.team-band .team-card{background:var(--white);border:1px solid var(--gray-5)}
+.team-band .team-avatar{width:72px;height:72px;font-size:22px;border-radius:0}
+.team-band .team-card{grid-template-columns:72px 1fr}
 </style>
 </head>
 <body>
@@ -532,33 +581,29 @@ footer{
 </div>
 
 <!-- PROBLEM / WHY -->
-<div class="section" id="problem">
+<div class="section stat-band" id="problem">
   <div class="section-inner">
     <div class="kicker">The problem</div>
     <h2>Misinformation is not a bug.<br>It is the feature.</h2>
 
-    <div class="problem-grid">
-      <div class="problem-stat-col">
-        <div class="problem-stat">
-          <div class="problem-stat-num">65<span>%</span></div>
-          <div class="problem-stat-label">of Americans say they regularly run into misinformation in conversations and on social media.</div>
-          <div class="problem-source">Pew Research Center, 2024</div>
-        </div>
-        <div class="problem-stat">
-          <div class="problem-stat-num">6x</div>
-          <div class="problem-stat-label">faster: false news spreads six times more quickly than accurate news.</div>
-          <div class="problem-source">Vosoughi, Roy &amp; Aral, MIT / Science, 2018</div>
-        </div>
+    <div class="stat-row">
+      <div class="stat-big">
+        <div class="stat-num">65<span>%</span></div>
+        <p>of Americans say they regularly run into misinformation in conversations and on social media.</p>
+        <small>Pew Research Center, 2024</small>
       </div>
-      <div class="problem-copy">
-        <p>Most people argue to win, not to find the truth. Fallacies go unchecked and conversations go in circles. <strong>The best debates are won by the most accurate voice, not the loudest.</strong></p>
+      <div class="stat-big">
+        <div class="stat-num">6<span>x</span></div>
+        <p>faster: false news spreads six times more quickly than accurate news.</p>
+        <small>Vosoughi, Roy &amp; Aral, MIT / Science, 2018</small>
       </div>
+      <p class="stat-copy">Most people argue to win, not to find the truth. Fallacies go unchecked and conversations go in circles. <strong>The best debates are won by the most accurate voice, not the loudest.</strong></p>
     </div>
   </div>
 </div>
 
 <!-- HOW IT WORKS -->
-<div class="section" id="how">
+<div class="section product-section" id="how">
   <div class="section-inner">
     <div class="kicker">How it works</div>
     <h2>Four steps.<br>One verdict.</h2>
@@ -631,28 +676,46 @@ footer{
     <h2>Run your whole team from one link.</h2>
     <p class="body-text">Students join with one link, no accounts. You see who practiced and what trips them up, and you can post a weekly topic.</p>
 
-    <div class="coach-steps">
-      <div class="coach-step"><span class="coach-n">1</span><h4>Create your league</h4><p>Get a code, a student link, and a coach key. Free.</p></div>
-      <div class="coach-step"><span class="coach-n">2</span><h4>Send one link</h4><p>The code is already filled in.</p></div>
-      <div class="coach-step"><span class="coach-n">3</span><h4>Coach with the data</h4><p>Rounds, scores, common fallacies, assignments, CSVs.</p></div>
-    </div>
+    <div class="coach-layout">
+      <div>
+        <div class="coach-steps">
+          <div class="coach-step"><span class="coach-n">1</span><h4>Create your league</h4><p>Get a code, a student link, and a coach key. Free.</p></div>
+          <div class="coach-step"><span class="coach-n">2</span><h4>Send one link</h4><p>The code is already filled in.</p></div>
+          <div class="coach-step"><span class="coach-n">3</span><h4>Coach with the data</h4><p>Rounds, scores, common fallacies, assignments, CSVs.</p></div>
+        </div>
 
-    <ul class="coach-list">
-      <li>Live fact-checks and a short review after every speech</li>
-      <li>Flashcards, quizzes, and fallacy and objection trainers</li>
-      <li>Mock Trial case files with an objection log</li>
-      <li>Online rounds with voice and a live transcript</li>
-    </ul>
+        <ul class="coach-list">
+          <li>Live fact-checks and a short review after every speech</li>
+          <li>Flashcards, quizzes, and fallacy and objection trainers</li>
+          <li>Mock Trial case files with an objection log</li>
+          <li>Online rounds with voice and a live transcript</li>
+        </ul>
 
-    <div class="coach-cta">
-      <a class="coach-btn coach-btn-solid" href="app.html#coach">Create your league (free)</a>
-      <a class="coach-btn" href="#schedule">Talk to Jeffrey first</a>
+        <div class="coach-cta">
+          <a class="coach-btn coach-btn-solid" href="app.html#coach">Create your league (free)</a>
+          <a class="coach-btn" href="#schedule">Talk to Jeffrey first</a>
+        </div>
+      </div>
+
+      <div class="coach-demo" aria-label="Example league dashboard">
+        <div class="cd-bar"><span class="cd-title">Lincoln High Debate</span><span class="cd-tag">Example</span></div>
+        <div class="cd-totals"><div><b>14</b>rounds</div><div><b>3</b>students</div><div><b>3.4</b>avg score</div></div>
+        <div class="cd-weeks" aria-hidden="true"><i style="height:12%"></i><i style="height:30%"></i><i style="height:22%"></i><i style="height:48%"></i><i style="height:64%"></i><i style="height:40%"></i><i style="height:86%"></i><i style="height:72%"></i></div>
+        <table class="cd-table">
+          <thead><tr><th>Student</th><th>Rounds</th><th>Avg</th><th>Top fallacy</th></tr></thead>
+          <tbody>
+            <tr><td>Ana</td><td>8</td><td>3.5</td><td><span class="cd-flag">Ad Hominem</span></td></tr>
+            <tr><td>Marcus</td><td>4</td><td>2.0</td><td><span class="cd-flag">Straw Man</span></td></tr>
+            <tr><td>Priya</td><td>2</td><td>4.1</td><td><span class="cd-flag">Slippery Slope</span></td></tr>
+          </tbody>
+        </table>
+      </div>
     </div>
   </div>
 </div>
 
 <!-- TEAM -->
-<div class="section" id="team">
+<div class="section team-band" id="team">
   <div class="section-inner">
     <div class="kicker">The team</div>
     <h2>Built in New York.</h2>
