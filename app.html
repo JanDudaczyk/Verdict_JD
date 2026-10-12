@@ -103,6 +103,10 @@
      yellow = the round (setup, debate)   pink  = outcomes (results, progress)
      sky    = other people (online, league)   mint = learning (learn, how it works)
      lilac  = prep (case builder, checker)    peach = upload                        */
+  body:has(#screen-setup.active) {
+    --paper: #FFFFFF; --paper-deep: #E9E9E4; --paper-pale: #F4F4F0;
+    --ink-2: #4A4A44; --ink-3: #6B6B64; --rule: rgba(30, 80, 190, 0.18);
+  }
   body:has(#screen-results.active), body:has(#screen-progress.active) {
     --paper: #FFA6CB; --paper-deep: #FF86B7; --paper-pale: #FFD3E5;
     --ink-2: #5B1A3C; --ink-3: #7D2E55; --rule: rgba(40, 70, 190, 0.3);
