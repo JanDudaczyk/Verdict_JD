@@ -274,9 +274,15 @@
     if (input.value) showAssignment(input.value);
   }
 
+  var HASH_SCREENS = { online: "screen-online", learn: "screen-learn" };
+  function goHashScreen() {
+    var m = /^#(online|learn)$/.exec(location.hash);
+    if (m) navTo(HASH_SCREENS[m[1]]);
+  }
   document.addEventListener("DOMContentLoaded", function () {
     initStudent();
     if (/^#(league|coach)$/.test(location.hash)) { navTo("screen-league"); var c = $("league-create-card"); if (c) c.scrollIntoView(); }
+    goHashScreen();
   });
-  window.addEventListener("hashchange", function () { if (/^#(league|coach)$/.test(location.hash)) navTo("screen-league"); });
+  window.addEventListener("hashchange", function () { if (/^#(league|coach)$/.test(location.hash)) navTo("screen-league"); goHashScreen(); });
 })();

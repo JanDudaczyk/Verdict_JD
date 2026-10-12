@@ -509,6 +509,84 @@ footer{
 .team-band .team-card{background:var(--white);border:1px solid var(--gray-5)}
 .team-band .team-avatar{width:72px;height:72px;font-size:22px;border-radius:0}
 .team-band .team-card{grid-template-columns:72px 1fr}
+
+/* ---- debaters section ---- */
+.debaters-band{background:var(--gray-6)}
+.deb-layout{display:grid;grid-template-columns:1fr 1.05fr;gap:56px;align-items:start;margin-top:36px}
+@media(max-width:960px){.deb-layout{grid-template-columns:1fr;gap:40px}}
+.rank-demo{background:var(--black);color:var(--white);box-shadow:10px 10px 0 var(--red);margin:0 10px 10px 0;overflow:hidden}
+.rd-top{display:flex;align-items:center;gap:18px;padding:22px 20px 14px}
+.rd-badge{flex:none}
+.rd-tier{font-family:var(--font-display);font-size:44px;font-weight:900;line-height:1;letter-spacing:-1.5px}
+.rd-meta{margin-top:6px;font-size:13px;color:rgba(250,250,248,0.6)}
+.rd-bar{height:12px;margin:4px 20px 0;border:2px solid rgba(250,250,248,0.5)}
+.rd-bar i{display:block;height:100%;background:#3BDC80}
+.rd-next{margin:8px 20px 18px;font-size:12px;color:rgba(250,250,248,0.55)}
+.rd-list{list-style:none;border-top:1px solid rgba(250,250,248,0.14)}
+.rd-list li{display:flex;align-items:center;gap:14px;padding:12px 20px;font-size:14px;border-bottom:1px solid rgba(250,250,248,0.1)}
+.rd-list li:last-child{border-bottom:0}
+.rd-list b{min-width:46px}
+.rd-list li.win b{color:#3BDC80}
+.rd-list li.loss b{color:#FF7A7F}
+.rd-list span{flex:1;color:rgba(250,250,248,0.75)}
+.rd-list em{font-style:normal;font-weight:700;font-variant-numeric:tabular-nums}
+.deb-list{list-style:none;margin:0 0 28px;padding:0}
+.deb-list li{padding:16px 0;border-bottom:1px solid var(--gray-5)}
+.deb-list li:first-child{padding-top:0}
+.deb-list h4{font-size:17px;font-weight:600;letter-spacing:-.2px;margin-bottom:2px}
+.deb-list p{font-size:15px;line-height:1.55;color:var(--gray-3)}
+
+/* ---- band pattern: Crimson, White, Black, Crimson, White, Black, Crimson ---- */
+:root{--crimson:#4A1218}
+.section.band-crimson,.section.band-black{border-bottom:0}
+.band-crimson{background:var(--crimson);color:var(--white)}
+.band-black{background:var(--black);color:var(--white)}
+.band-white{background:var(--white);color:var(--black)}
+.stat-band{background:var(--crimson)}
+.band-crimson h2,.band-black h2{color:var(--white)}
+.band-crimson .kicker,.band-black .kicker{color:var(--white);border-color:rgba(250,250,248,0.7)}
+.band-crimson .body-text,.band-black .body-text{color:rgba(250,250,248,0.78)}
+
+/* how it works is white again: restore the light grid */
+.band-white .how-grid,.band-white .how-item{border-color:var(--gray-5)}
+.band-white .how-num{color:var(--gray-5)}
+.band-white .how-item h4{color:var(--black);font-size:15px}
+.band-white .how-item p{color:var(--gray-3);font-size:13px}
+
+/* debaters: black */
+.band-black .rank-demo{background:#151515;border:1px solid rgba(250,250,248,0.16);box-shadow:10px 10px 0 var(--crimson)}
+.band-black .deb-list li{border-bottom-color:rgba(250,250,248,0.16)}
+.band-black .deb-list h4{color:var(--white)}
+.band-black .deb-list p{color:rgba(250,250,248,0.65)}
+.band-black .coach-btn{border-color:rgba(250,250,248,0.6);color:var(--white)}
+.band-black .coach-btn:hover{background:var(--white);color:var(--black)}
+.band-black .coach-btn-solid{background:var(--white);border-color:var(--white);color:var(--black)}
+.band-black .coach-btn-solid:hover{background:var(--gray-5)}
+
+/* coaches: crimson */
+.band-crimson .coach-step{background:transparent;border-color:rgba(250,250,248,0.4)}
+.band-crimson .coach-step h4{color:var(--white)}
+.band-crimson .coach-step p{color:rgba(250,250,248,0.8)}
+.band-crimson .coach-n{background:var(--white);color:var(--crimson)}
+.band-crimson .coach-list li{border-bottom-color:rgba(250,250,248,0.3);color:var(--white)}
+.band-crimson .coach-btn{border-color:rgba(250,250,248,0.7);color:var(--white)}
+.band-crimson .coach-btn:hover{background:var(--white);color:var(--crimson)}
+.band-crimson .coach-btn-solid{background:var(--white);border-color:var(--white);color:var(--crimson)}
+.band-crimson .coach-btn-solid:hover{background:var(--gray-5)}
+.band-crimson .coach-demo{box-shadow:10px 10px 0 var(--black)}
+
+/* team: white */
+.band-white .team-grid{background:transparent;gap:20px}
+.band-white .team-card{background:var(--white);border:1px solid var(--gray-5)}
+
+/* book a call: black, with the white scheduler card on it */
+.band-black .sched-instant{color:rgba(250,250,248,0.7)}
+.band-black .sched{border-color:rgba(250,250,248,0.2)}
+
+/* contact: crimson */
+.band-crimson .contact-meta-item dt{color:rgba(250,250,248,0.7)}
+.band-crimson .contact-meta-item dd{color:var(--white)}
+.band-crimson .contact-meta-item a{text-decoration:underline;text-underline-offset:3px}
 </style>
 </head>
 <body>
@@ -520,6 +598,7 @@ footer{
   <div class="nav-right">
     <a href="#problem" class="nav-link">Why</a>
     <a href="#how" class="nav-link">How it works</a>
+    <a href="#debaters" class="nav-link">Debaters</a>
     <a href="#coaches" class="nav-link">Coaches</a>
     <a href="#team" class="nav-link">Team</a>
     <a href="#schedule" class="nav-link">Book a call</a>
@@ -581,7 +660,7 @@ footer{
 </div>
 
 <!-- PROBLEM / WHY -->
-<div class="section stat-band" id="problem">
+<div class="section band-crimson stat-band" id="problem">
   <div class="section-inner">
     <div class="kicker">The problem</div>
     <h2>Misinformation is not a bug.<br>It is the feature.</h2>
@@ -603,7 +682,7 @@ footer{
 </div>
 
 <!-- HOW IT WORKS -->
-<div class="section product-section" id="how">
+<div class="section band-white" id="how">
   <div class="section-inner">
     <div class="kicker">How it works</div>
     <h2>Four steps.<br>One verdict.</h2>
@@ -669,8 +748,48 @@ footer{
   </div>
 </div>
 
+<!-- DEBATERS -->
+<div class="section band-black" id="debaters">
+  <div class="section-inner">
+    <div class="kicker">For debaters &amp; students</div>
+    <h2>Practice anywhere.<br>Get better every round.</h2>
+    <p class="body-text">Solo or against a friend, with feedback after every speech. Got a link from your coach? Open it and your league is already filled in.</p>
+
+    <div class="deb-layout">
+      <div class="rank-demo" aria-label="Example rank card">
+        <div class="cd-bar"><span class="cd-title">Your rank</span><span class="cd-tag">Example</span></div>
+        <div class="rd-top">
+          <svg class="rd-badge" width="64" height="75" viewBox="0 0 48 56" aria-hidden="true"><path d="M24 6 L44 13 V29 C44 41 35 50 24 54 C13 50 4 41 4 29 V13 Z" fill="#FFC107" stroke="#0C0C0C" stroke-width="3"/><text x="24" y="38" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-weight="900" font-size="26" fill="#0C0C0C">G</text></svg>
+          <div><div class="rd-tier">Gold</div><div class="rd-meta">Rating 1212 &middot; 6 wins, 2 losses</div></div>
+        </div>
+        <div class="rd-bar" aria-hidden="true"><i style="width:8%"></i></div>
+        <div class="rd-next">138 points to Platinum</div>
+        <ul class="rd-list">
+          <li class="win"><b>Won</b><span>vs Ben</span><em>+22</em></li>
+          <li class="loss"><b>Lost</b><span>vs Priya</span><em>&minus;18</em></li>
+          <li class="win"><b>Won</b><span>vs Marcus</span><em>+16</em></li>
+        </ul>
+      </div>
+
+      <div>
+        <ul class="deb-list">
+          <li><h4>Practice on your own</h4><p>Live fact-checks, fallacy flags, and a short review after every turn.</p></li>
+          <li><h4>Debate someone online</h4><p>Voice and a live transcript. Play casual, or ranked from Bronze to Champion.</p></li>
+          <li><h4>Study</h4><p>Flashcards, quizzes, and fallacy and objection trainers.</p></li>
+          <li><h4>Mock Trial</h4><p>Case files, witnesses, and an objection log.</p></li>
+        </ul>
+        <div class="coach-cta">
+          <a class="coach-btn coach-btn-solid" href="app.html">Start a round</a>
+          <a class="coach-btn" href="app.html#online">Play online</a>
+          <a class="coach-btn" href="app.html#learn">Study sets</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- COACHES -->
-<div class="section" id="coaches">
+<div class="section band-crimson" id="coaches">
   <div class="section-inner">
     <div class="kicker">For coaches &amp; leagues</div>
     <h2>Run your whole team from one link.</h2>
@@ -679,7 +798,7 @@ footer{
     <div class="coach-layout">
       <div>
         <div class="coach-steps">
-          <div class="coach-step"><span class="coach-n">1</span><h4>Create your league</h4><p>Get a code, a student link, and a coach key. Free.</p></div>
+          <div class="coach-step"><span class="coach-n">1</span><h4>Create your league</h4><p>Get a code, a student link, and a coach key.</p></div>
           <div class="coach-step"><span class="coach-n">2</span><h4>Send one link</h4><p>The code is already filled in.</p></div>
           <div class="coach-step"><span class="coach-n">3</span><h4>Coach with the data</h4><p>Rounds, scores, common fallacies, assignments, CSVs.</p></div>
         </div>
@@ -692,7 +811,7 @@ footer{
         </ul>
 
         <div class="coach-cta">
-          <a class="coach-btn coach-btn-solid" href="app.html#coach">Create your league (free)</a>
+          <a class="coach-btn coach-btn-solid" href="app.html#coach">Create your league</a>
           <a class="coach-btn" href="#schedule">Talk to Jeffrey first</a>
         </div>
       </div>
@@ -715,7 +834,7 @@ footer{
 </div>
 
 <!-- TEAM -->
-<div class="section team-band" id="team">
+<div class="section band-white" id="team">
   <div class="section-inner">
     <div class="kicker">The team</div>
     <h2>Built in New York.</h2>
@@ -743,7 +862,7 @@ footer{
 </div>
 
 <!-- BOOK A CALL -->
-<div class="section" id="schedule">
+<div class="section band-black" id="schedule">
   <div class="section-inner">
     <div class="kicker">Book a call</div>
     <h2>Talk to Jeffrey.</h2>
@@ -799,7 +918,7 @@ footer{
 </div>
 
 <!-- CONTACT -->
-<div class="section contact-section" id="contact">
+<div class="section band-crimson" id="contact">
   <div class="section-inner">
     <div class="kicker">Get in touch</div>
     <h2>Questions? Email us.</h2>
